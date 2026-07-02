@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useProduct } from '../features/products/hooks';
+import { useAddToCart } from '../features/cart/hooks';
 
 /* ── Star rating display ── */
 const StarRating = ({ rating }) => {
@@ -55,6 +56,7 @@ const CartIcon = () => (
 const ProductDetail = () => {
   const { id } = useParams();
   const { data: product, isLoading, isError, error } = useProduct(id);
+  const addToCart = useAddToCart();
 
   if (isLoading) return <Skeleton />;
 
@@ -178,11 +180,12 @@ const ProductDetail = () => {
             <button
               type="button"
               aria-label={`Add ${title} to cart`}
-              disabled={stock === 0}
+              disabled={stock === 0 || addToCart.isPending}
+              onClick={() => addToCart.mutate({ id: product.id, title, price, thumbnail })}
               className="flex items-center justify-center gap-2 flex-1 h-11 rounded-2xl bg-[#ACECF7] text-sm font-semibold text-cyan-900 hover:bg-[#C9E4E7] active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
             >
               <CartIcon />
-              Add to Cart
+              {addToCart.isPending ? 'Adding…' : 'Add to Cart'}
             </button>
             <Link
               to="/products"
